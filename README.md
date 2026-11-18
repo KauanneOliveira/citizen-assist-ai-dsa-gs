@@ -307,3 +307,7 @@ Os testes usam os dados da seção 10. Os grupos 11.1 e 11.2 partem de uma execu
 | 46 | abrir o `servicos.txt` | 9 linhas por serviço, em ordem de ID (linhas 1, 10, 19, 28 e 37 com `2`, `4`, `5`, `6` e `7`) | Conforme o esperado |
 | 47 | opção `6` para os IDs 2, 4, 5, 6 e 7 e depois opção `2` | `Lista vazia.` | Conforme o esperado |
 | 48 | opção `0`, apagar o `servicos.txt` e executar | inicia sem erro e `2` mostra `Lista vazia.` | Conforme o esperado |
+
+## 12. Demonstração em vídeo
+
+[Assistir à demonstração](https://youtu.be/tZJxAmTLvlY)
