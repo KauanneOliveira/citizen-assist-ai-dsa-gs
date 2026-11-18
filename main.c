@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
-// ESTRUTURA DO REGISTRO (NO DA LISTA)
+// DEFINICOES, CONSTANTES E ESTRUTURAS
 #define T_NOME 60
 #define T_CATEGORIA 30
 #define T_DESC 120
@@ -15,6 +15,7 @@
 #define ARQUIVO "servicos.txt"
 #define POR_ID 1
 #define POR_NOME 2
+#define QTD_CATEGORIAS 6
 
 typedef struct Servico {
     int id;
@@ -29,8 +30,7 @@ typedef struct Servico {
     struct Servico *proximo;
 } Servico;
 
-// LISTA ENCADEADA
-
+// MANIPULACAO DA LISTA ENCADEADA
 // cria um no com malloc e retorna NULL se faltar memoria
 Servico *criar_no(int id, const char *nome, const char *categoria,
                   const char *descricao, const char *requisitos,
@@ -66,10 +66,49 @@ Servico *inserir_final(Servico *cabeca, Servico *novo) {
     return cabeca;
 }
 
+// libera todos os nos (free)  
+void liberar_lista(Servico *cabeca) {
+    Servico *atual = cabeca;
+    while (atual != NULL) {
+        Servico *prox = atual->proximo;
+        free(atual);
+        atual = prox;
+    }
+}
+
+// busca sequencial por ID; retorna o no ou NULL
+Servico *buscar_por_id(Servico *cabeca, int id) {
+    Servico *atual = cabeca;
+    while (atual != NULL) {
+        if (atual->id == id) {
+            return atual;
+        }
+        atual = atual->proximo;
+    }
+    return NULL;
+}
+
+// FUNCOES DE EXIBICAO E FORMATACAO
+// formata o titulo da opcao escolhida
+void titulo(const char *texto) {
+    printf("\n\t\t%s\n", texto);
+}
+
 // formata a exibicao
 void exibir_resumo(Servico *s) {
     printf("ID %d - %s\n", s->id, s->nome);
     printf("\tCategoria: %s\n", s->categoria);
+    printf("\tLocal: %s-%s\n", s->cidade, s->estado);
+    printf("\tTelefone: %s\n", s->telefone);
+    printf("\tHorario: %s\n\n", s->horario);
+}
+
+// mostra todos os campos de um servico
+void exibir_detalhe(Servico *s) {
+    printf("ID %d - %s\n", s->id, s->nome);
+    printf("\tCategoria: %s\n", s->categoria);
+    printf("\tDescricao: %s\n", s->descricao);
+    printf("\tRequisitos: %s\n", s->requisitos);
     printf("\tLocal: %s-%s\n", s->cidade, s->estado);
     printf("\tTelefone: %s\n", s->telefone);
     printf("\tHorario: %s\n\n", s->horario);
@@ -88,19 +127,7 @@ void listar(Servico *cabeca) {
     }
 }
 
-// libera todos os nos (free)  
-void liberar_lista(Servico *cabeca) {
-    Servico *atual = cabeca;
-    while (atual != NULL) {
-        Servico *prox = atual->proximo;
-        free(atual);
-        atual = prox;
-    }
-}
-
 // ENTRADA DE DADOS E VALIDACAO 
-#define QTD_CATEGORIAS 6
-
 const char *CATEGORIAS[QTD_CATEGORIAS] = {
     "Delegacia e seguranca",
     "Acolhimento e abrigo",
@@ -150,34 +177,6 @@ int ler_inteiro(const char *msg, int *valor) {
     return 1;
 }
 
-// busca sequencial por ID; retorna o no ou NULL
-Servico *buscar_por_id(Servico *cabeca, int id) {
-    Servico *atual = cabeca;
-    while (atual != NULL) {
-        if (atual->id == id) {
-            return atual;
-        }
-        atual = atual->proximo;
-    }
-    return NULL;
-}
-
-// mostra o menu de categorias e copia a escolhida
-void escolher_categoria(char *dest) {
-    int op;
-    while (1) {
-        printf("Categorias:\n");
-        for (int i = 0; i < QTD_CATEGORIAS; i++) {
-            printf("  %d - %s\n", i + 1, CATEGORIAS[i]);
-        }
-        if (ler_inteiro("Escolha a categoria: ", &op) && op >= 1 && op <= QTD_CATEGORIAS) {
-            strcpy(dest, CATEGORIAS[op - 1]);
-            return;
-        }
-        printf("Opcao invalida.\n");
-    }
-}
-
 // le a UF: exatamente 2 letras e guarda em maiuscula
 void ler_estado(char *dest) {
     char tmp[20];
@@ -198,6 +197,23 @@ void ler_estado(char *dest) {
     }
 }
 
+// mostra o menu de categorias e copia a escolhida
+void escolher_categoria(char *dest) {
+    int op;
+    while (1) {
+        printf("Categorias:\n");
+        for (int i = 0; i < QTD_CATEGORIAS; i++) {
+            printf("  %d - %s\n", i + 1, CATEGORIAS[i]);
+        }
+        if (ler_inteiro("Escolha a categoria: ", &op) && op >= 1 && op <= QTD_CATEGORIAS) {
+            strcpy(dest, CATEGORIAS[op - 1]);
+            return;
+        }
+        printf("Opcao invalida.\n");
+    }
+}
+
+// CADASTRO DE SERVICOS
 // cadastra um servico lendo do teclado e devolve a cabeca
 Servico *cadastrar(Servico *cabeca) {
     int id;
@@ -233,17 +249,7 @@ Servico *cadastrar(Servico *cabeca) {
     return inserir_final(cabeca, novo);
 }
 
-// mostra todos os campos de um servico
-void exibir_detalhe(Servico *s) {
-    printf("ID %d - %s\n", s->id, s->nome);
-    printf("\tCategoria: %s\n", s->categoria);
-    printf("\tDescricao: %s\n", s->descricao);
-    printf("\tRequisitos: %s\n", s->requisitos);
-    printf("\tLocal: %s-%s\n", s->cidade, s->estado);
-    printf("\tTelefone: %s\n", s->telefone);
-    printf("\tHorario: %s\n\n", s->horario);
-}
-
+// CONSULTAS E PESQUISAS
 // consulta por id usando a busca sequencial
 void consultar_por_id(Servico *cabeca) {
     int id;
@@ -333,6 +339,7 @@ void menu_pesquisa(Servico *cabeca) {
     }
 }
 
+// ATUALIZACAO E REMOCAO DE REGISTROS
 // atualiza um unico campo do servico (o id nao pode ser alterado)
 void atualizar(Servico *cabeca) {
     int id, op;
@@ -410,6 +417,7 @@ Servico *excluir(Servico *cabeca) {
     return cabeca;
 }
 
+// ORDENACAO E COMPARACAO
 // compara dois textos ignorando maiusculas e minusculas
 int comparar_texto(const char *a, const char *b) {
     int i = 0;
@@ -487,6 +495,7 @@ void ordenar(Servico *cabeca) {
     ordenar_lista(cabeca, POR_ID);
 }
 
+// ANALISE E RELATORIOS
 // mostra o total de servicos e a quantidade por categoria
 void analisar(Servico *cabeca) {
     int contagem[QTD_CATEGORIAS] = {0};
@@ -514,11 +523,7 @@ void analisar(Servico *cabeca) {
     }
 }
 
-// formata o titulo da opcao escolhida
-void titulo(const char *texto) {
-    printf("\n\t\t%s\n", texto);
-}
-
+// MANIPULACAO DE ARQUIVOS
 // le uma linha do arquivo e remove o \n e retorna 0 se acabou o arquivo
 int ler_linha_arquivo(FILE *arq, char *dest, int tam) {
     if (fgets(dest, tam, arq) == NULL) {
@@ -598,7 +603,7 @@ Servico *carregar(void) {
     return cabeca;
 }
 
-// MAIN   
+// FUNCAO PRINCIPAL 
 int main(void) {
     Servico *lista = carregar();
     ordenar_lista(lista, POR_ID); // garante a ordem de id mesmo com arquivo antigo
