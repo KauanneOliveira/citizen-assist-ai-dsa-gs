@@ -408,6 +408,60 @@ Servico *excluir(Servico *cabeca) {
     return cabeca;
 }
 
+// troca os dados de dois nos, mantendo cada ponteiro proximo no lugar
+void trocar_dados(Servico *a, Servico *b) {
+    Servico temp = *a;
+    Servico *proxA = a->proximo;
+    Servico *proxB = b->proximo;
+
+    *a = *b;
+    *b = temp;
+    a->proximo = proxA;
+    b->proximo = proxB;
+}
+
+/* ordena a lista por nome (a-z) com insertion sort.
+   o inicio da lista e a parte ja ordenada; a cada passo, o proximo no
+   e encaixado na posicao certa deslocando os dados com trocas */
+void ordenar_por_nome(Servico *cabeca) {
+    if (cabeca == NULL || cabeca->proximo == NULL) {
+        return;
+    }
+
+    Servico *ultimo = cabeca; // ultimo no da parte ordenada
+    while (ultimo->proximo != NULL) {
+        Servico *atual = ultimo->proximo; // no a ser encaixado
+
+        if (strcmp(ultimo->nome, atual->nome) <= 0) {
+            ultimo = atual; // ja esta na posicao certa
+        } else {
+            // acha o primeiro no da parte ordenada com nome maior que o atual
+            Servico *pos = cabeca;
+            while (strcmp(pos->nome, atual->nome) <= 0) {
+                pos = pos->proximo;
+            }
+            // empurra os dados para frente ate chegar no atual
+            Servico *k = pos;
+            while (k != atual) {
+                trocar_dados(k, atual);
+                k = k->proximo;
+            }
+            ultimo = atual; // a parte ordenada agora inclui o atual
+        }
+    }
+}
+
+// ordena e mostra a lista
+void ordenar(Servico *cabeca) {
+    if (cabeca == NULL) {
+        printf("Lista vazia.\n");
+        return;
+    }
+    ordenar_por_nome(cabeca);
+    printf("Lista ordenada por nome (A-Z):\n\n");
+    listar(cabeca);
+}
+
 // formata o titulo da opcao escolhida
 void titulo(const char *texto) {
     printf("\n\t\t%s\n", texto);
@@ -493,7 +547,7 @@ int main(void) {
     int op;
 
     do {
-        printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n5 - Atualizar\n6 - Excluir\n0 - Sair\n");
+        printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n5 - Atualizar\n6 - Excluir\n7 - Ordenar por nome\n0 - Sair\n");
         if (!ler_inteiro("Opcao: ", &op)) {
             op = -1;
         }
@@ -523,6 +577,11 @@ int main(void) {
             case 6:
                 titulo("EXCLUIR");
                 lista = excluir(lista);
+                salvar(lista);
+                break;
+            case 7:
+                titulo("ORDENAR");
+                ordenar(lista);
                 salvar(lista);
                 break;
             case 0:
