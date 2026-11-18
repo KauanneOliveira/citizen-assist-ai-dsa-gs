@@ -53,7 +53,7 @@ Lista **simplesmente encadeada**, implementada pela equipe com `struct`, `typede
 
 | Operação | Função | Como funciona |
 |---|---|---|
-| Criação do nó | `criar_no` | `malloc`; devolve `NULL` se faltar memória |
+| Criação do nó | `criar_no` | `malloc` e devolve `NULL` se faltar memória |
 | Inserção | `inserir_final` | percorre até o último nó e liga o novo |
 | Percurso | `listar` | segue `proximo` até `NULL` |
 | Remoção | `excluir` | religa o ponteiro do nó anterior (ou a cabeça) e usa `free` |
@@ -71,7 +71,7 @@ A lista é mantida em ordem crescente de ID.
 | 4 | `menu_pesquisa` | pesquisa por categoria ou por estado |
 | 5 | `atualizar` | altera um campo por vez (o ID não muda) |
 | 6 | `excluir` | remove um serviço pelo ID |
-| 7 | `ordenar` | exibe a lista ordenada por nome (A-Z); depois a lista volta à ordem de ID |
+| 7 | `ordenar` | exibe a lista ordenada por nome (A-Z). Depois a lista volta à ordem de ID |
 | 8 | `analisar` | total de serviços e quantidade por categoria (as 6 sempre aparecem) |
 | 0 | - | encerra e libera a memória |
 
@@ -99,17 +99,17 @@ Tratamentos: opção inválida, ID inválido ou duplicado, ID inexistente, campo
 | Gravar no arquivo | `salvar` | O(n) | O(n) |
 | Carregar do arquivo | `carregar` | O(n²) | O(n²) |
 
-**Inserção.** A inserção é feita no final. Como a lista não guarda o ponteiro do último nó, `inserir_final` percorre a lista até encontrá-lo, o que custa O(n); só na lista vazia o novo nó vira a cabeça em O(1). O cadastro completo também é O(n): busca de ID duplicado (O(n)), inserção (O(n)), reordenação por ID e gravação no arquivo (ambas O(n)). A reordenação é linear porque, depois da inserção, no máximo um nó está fora de lugar. Com um ponteiro para o último nó a inserção cairia para O(1), mas isso não foi implementado.
+**Inserção.**: a inserção é feita no final. Como a lista não guarda o ponteiro do último nó, `inserir_final` percorre a lista até encontrá-lo, o que custa O(n); só na lista vazia o novo nó vira a cabeça em O(1). O cadastro completo também é O(n): busca de ID duplicado (O(n)), inserção (O(n)), reordenação por ID e gravação no arquivo (ambas O(n)). A reordenação é linear porque, depois da inserção, no máximo um nó está fora de lugar. Com um ponteiro para o último nó a inserção cairia para O(1), mas isso não foi implementado.
 
-**Busca.** A busca é sequencial: começa na cabeça e segue `proximo`. Na busca por ID, o melhor caso é O(1) (registro no primeiro nó) e o pior é O(n) (último nó ou ID inexistente). Nas pesquisas por categoria e estado, a lista é sempre percorrida inteira, pois podem existir vários resultados, então o custo é O(n) em qualquer caso. A busca binária não se aplica, pois a lista encadeada não dá acesso direto ao elemento do meio.
+**Busca.**: a busca é sequencial. Começa na cabeça e segue `proximo`. Na busca por ID, o melhor caso é O(1) (registro no primeiro nó) e o pior é O(n) (último nó ou ID inexistente). Nas pesquisas por categoria e estado, a lista é sempre percorrida inteira, pois podem existir vários resultados, então o custo é O(n) em qualquer caso. A busca binária não se aplica, pois a lista encadeada não dá acesso direto ao elemento do meio.
 
-**Remoção.** `excluir` percorre a lista guardando o nó anterior até achar o ID (O(n) no pior caso, O(1) se for o primeiro nó). Religar o ponteiro do anterior (ou a cabeça) e liberar o nó com `free` custa O(1). O custo total é O(n).
+**Remoção.**: `excluir` percorre a lista guardando o nó anterior até achar o ID (O(n) no pior caso, O(1) se for o primeiro nó). Religar o ponteiro do anterior (ou a cabeça) e liberar o nó com `free` custa O(1). O custo total é O(n).
 
-**Ordenação.** Foi usado o Insertion Sort com troca de dados entre os nós (`trocar_dados`). No melhor caso (lista já ordenada), cada nó é comparado só com o último da parte ordenada, o que dá n-1 comparações e O(n). No pior caso (ordem inversa), cada nó é deslocado por toda a parte ordenada, o que dá cerca de n(n-1)/2 comparações e trocas, ou seja, O(n²). O caso médio também é O(n²). O espaço adicional é O(1), pois só há ponteiros auxiliares e uma estrutura temporária na troca. O algoritmo é estável, porque a comparação usa `<=` e registros iguais mantêm a ordem relativa. Cada troca copia o registro inteiro, custo constante por troca que não muda a classe de complexidade. A opção 7 faz duas ordenações (por nome e de volta por ID) mais um percurso, então custa O(n²) no pior caso.
+**Ordenação.**: foi usado o Insertion Sort com troca de dados entre os nós (`trocar_dados`). No melhor caso (lista já ordenada), cada nó é comparado só com o último da parte ordenada, o que dá n-1 comparações e O(n). No pior caso (ordem inversa), cada nó é deslocado por toda a parte ordenada, o que dá cerca de n(n-1)/2 comparações e trocas, ou seja, O(n²). O caso médio também é O(n²). O espaço adicional é O(1), pois só há ponteiros auxiliares e uma estrutura temporária na troca. O algoritmo é estável, porque a comparação usa `<=` e registros iguais mantêm a ordem relativa. Cada troca copia o registro inteiro, custo constante por troca que não muda a classe de complexidade. A opção 7 faz duas ordenações (por nome e de volta por ID) mais um percurso, então custa O(n²) no pior caso.
 
-**Demais operações.** `listar`, `analisar` (um percurso com no máximo 6 comparações por nó) e `salvar` são O(n). A atualização de um campo custa O(n) pela busca do ID, e a regravação do arquivo também é O(n). `carregar` é O(n²), pois chama `inserir_final` (O(n)) para cada um dos n registros lidos.
+**Demais operações.**: `listar`, `analisar` (um percurso com no máximo 6 comparações por nó) e `salvar` são O(n). A atualização de um campo custa O(n) pela busca do ID, e a regravação do arquivo também é O(n). `carregar` é O(n²), pois chama `inserir_final` (O(n)) para cada um dos n registros lidos.
 
-**Observações.** *n* é a quantidade de serviços na lista. A comparação de textos é tratada como custo constante, porque os campos têm tamanho fixo (no máximo 119 caracteres). A leitura do teclado é desconsiderada. A análise segue a implementação efetiva: lista simplesmente encadeada sem ponteiro para o último nó.
+**Observações.**: *n* é a quantidade de serviços na lista. A comparação de textos é tratada como custo constante, porque os campos têm tamanho fixo (no máximo 119 caracteres). A leitura do teclado é desconsiderada. A análise segue a implementação efetiva: lista simplesmente encadeada sem ponteiro para o último nó.
 
 ## 8. Persistência
 
@@ -218,94 +218,92 @@ Nenhum serviço de Saúde ou Apoio psicológico foi incluído de propósito, par
 
 ## 11. Evidências de testes
 
-Os testes seguem a ordem abaixo e usam os dados da seção 10. Os grupos 11.1 e 11.2 partem de uma execução **sem** `servicos.txt`; do grupo 11.3 em diante, o `servicos.txt` é o da seção 10.1 (6 serviços). A coluna "Observado" é preenchida após a execução (os prints ficam na pasta `evidencias/`).
+Os testes usam os dados da seção 10. Os grupos 11.1 e 11.2 partem de uma execução **sem** `servicos.txt`; do grupo 11.3 em diante, o `servicos.txt` é o da seção 10.1 (6 serviços). Todos os testes foram executados e o resultado observado foi o esperado. Os prints ficam na pasta `evidencias/`, nomeados pelo número do teste (`teste-01.png`, `teste-02.png`, ...). Casos repetitivos de um mesmo grupo (por exemplo, a mensagem `Lista vazia.` em várias opções) podem não ter print próprio e foram executados com o mesmo resultado.
 
 ### 11.1 Lista vazia (sem `servicos.txt`)
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 1 | opção `2` | `Lista vazia.` | |
-| 2 | opção `3` | `Lista vazia.` | |
-| 3 | opção `4`, depois `1` | `Lista vazia.` | |
-| 4 | opção `4`, depois `2` | `Lista vazia.` | |
-| 5 | opção `5` | `Lista vazia.` | |
-| 6 | opção `6` | `Lista vazia.` | |
-| 7 | opção `7` | `Lista vazia.` | |
-| 8 | opção `8` | `Lista vazia.`, `Total de servicos: 0` e as 6 categorias com `0` | |
+| 1 | opção `2` | `Lista vazia.` | Conforme o esperado |
+| 2 | opção `3` | `Lista vazia.` | Conforme o esperado |
+| 3 | opção `4`, depois `1` | `Lista vazia.` | Conforme o esperado |
+| 4 | opção `4`, depois `2` | `Lista vazia.` | Conforme o esperado |
+| 5 | opção `5` | `Lista vazia.` | Conforme o esperado |
+| 6 | opção `6` | `Lista vazia.` | Conforme o esperado |
+| 7 | opção `7` | `Lista vazia.` | Conforme o esperado |
+| 8 | opção `8` | `Lista vazia.`, `Total de servicos: 0` e as 6 categorias com `0` | Conforme o esperado |
 
 ### 11.2 Menu principal
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 9 | opção `9` | `Opcao invalida.` e o menu volta | |
-| 10 | opção `abc` | `Opcao invalida.` e o menu volta | |
+| 9 | opção `9` | `Opcao invalida.` e o menu volta | Conforme o esperado |
+| 10 | opção `abc` | `Opcao invalida.` e o menu volta | Conforme o esperado |
 
 ### 11.3 Carga, consulta e pesquisa (com os 6 serviços da seção 10.1)
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 11 | iniciar o programa e opção `2` | os 6 serviços na ordem de ID (1 a 6), carregados do arquivo | |
-| 12 | opção `3`, ID `3` | os campos completos de Casa da Mulher Brasileira | |
-| 13 | opção `3`, ID `99` | `Nenhum servico encontrado com o ID 99.` | |
-| 14 | opção `3`, ID `abc` | `ID invalido.` | |
-| 15 | opção `4`, `1`, categoria `1` | serviços 2 e 4 e `Total encontrado: 2` | |
-| 16 | opção `4`, `1`, categoria `4` | `Nenhum servico encontrado na categoria Saude.` | |
-| 17 | opção `4`, `1`, categoria `9` | `Opcao invalida.` e o menu de categorias reaparece | |
-| 18 | opção `4`, `2`, estado `sp` | serviços 2 e 4 e `Total encontrado: 2` (aceita minúscula) | |
-| 19 | opção `4`, `2`, estado `RJ` | `Nenhum servico encontrado no estado RJ.` | |
-| 20 | opção `4`, `2`, estado `SAO` | `Estado invalido. Digite 2 letras.` e pede de novo | |
-| 21 | opção `4`, depois `9` | `Opcao invalida.` | |
+| 11 | iniciar o programa e opção `2` | os 6 serviços na ordem de ID (1 a 6), carregados do arquivo | Conforme o esperado |
+| 12 | opção `3`, ID `3` | os campos completos de Casa da Mulher Brasileira | Conforme o esperado |
+| 13 | opção `3`, ID `99` | `Nenhum servico encontrado com o ID 99.` | Conforme o esperado |
+| 14 | opção `3`, ID `abc` | `ID invalido.` | Conforme o esperado |
+| 15 | opção `4`, `1`, categoria `1` | serviços 2 e 4 e `Total encontrado: 2` | Conforme o esperado |
+| 16 | opção `4`, `1`, categoria `4` | `Nenhum servico encontrado na categoria Saude.` | Conforme o esperado |
+| 17 | opção `4`, `1`, categoria `9` | `Opcao invalida.` e o menu de categorias reaparece | Conforme o esperado |
+| 18 | opção `4`, `2`, estado `sp` | serviços 2 e 4 e `Total encontrado: 2` (aceita minúscula) | Conforme o esperado |
+| 19 | opção `4`, `2`, estado `RJ` | `Nenhum servico encontrado no estado RJ.` | Conforme o esperado |
+| 20 | opção `4`, `2`, estado `SAO` | `Estado invalido. Digite 2 letras.` e pede de novo | Conforme o esperado |
+| 21 | opção `4`, depois `9` | `Opcao invalida.` | Conforme o esperado |
 
 ### 11.4 Ordenação e análise
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 22 | opção `7` | `Lista ordenada por nome (A-Z):` com os IDs 5, 3, 6, 2, 4, 1 (`defensoria publica`, em minúsculo, fica entre Casa e Delegacia) | |
-| 23 | opção `2`, logo depois | IDs 1, 2, 3, 4, 5, 6 (a lista volta à ordem de ID) | |
-| 24 | opção `8` | `Total de servicos: 6`; Delegacia e seguranca: 2; Acolhimento e abrigo: 2; Apoio juridico: 1; Saude: 0; Apoio psicologico: 0; Canal de denuncia: 1 | |
+| 22 | opção `7` | `Lista ordenada por nome (A-Z):` com os IDs 5, 3, 6, 2, 4, 1 (`defensoria publica`, em minúsculo, fica entre Casa e Delegacia) | Conforme o esperado |
+| 23 | opção `2`, logo depois | IDs 1, 2, 3, 4, 5, 6 (a lista volta à ordem de ID) | Conforme o esperado |
+| 24 | opção `8` | `Total de servicos: 6`; Delegacia e seguranca: 2; Acolhimento e abrigo: 2; Apoio juridico: 1; Saude: 0; Apoio psicologico: 0; Canal de denuncia: 1 | Conforme o esperado |
 
 ### 11.5 Cadastro
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 25 | opção `1`, ID `7`, nome `Centro de Saude da Mulher`, categoria `4`, descrição `Atendimento de saude`, requisitos `Documento com foto`, cidade `Fortaleza`, estado `ce`, telefone `(85) 0000-0000`, horário `8h as 17h` | `Servico cadastrado com sucesso.` | |
-| 26 | opção `2` | serviço 7 por último, com `Fortaleza-CE` (UF em maiúscula) | |
-| 27 | opção `1`, ID `7` | `Ja existe um servico com o ID 7.`, sem pedir mais dados | |
-| 28 | opção `1`, ID `abc`, `0` ou `-5` | `ID invalido.` | |
-| 29 | opção `1`, ID `8`, nome vazio (só Enter) | `Campo obrigatorio. Tente novamente.` | |
-| 30 | opção `1`, ID `8`, nome `Teste`, categoria `9` | `Opcao invalida.` e o menu de categorias reaparece | |
-| 31 | opção `1`, ID `8`, nome `Teste`, categoria `1`, descrição, requisitos e cidade quaisquer, estado `1a` | `Estado invalido. Digite 2 letras.` e pede de novo | |
-
-Após o teste 31, cancele o cadastro do ID 8 informando um estado válido ou encerrando e removendo o serviço pela opção 6.
+| 25 | opção `1`, ID `7`, nome `Centro de Saude da Mulher`, categoria `4`, descrição `Atendimento de saude`, requisitos `Documento com foto`, cidade `Fortaleza`, estado `ce`, telefone `(85) 0000-0000`, horário `8h as 17h` | `Servico cadastrado com sucesso.` | Conforme o esperado |
+| 26 | opção `2` | serviço 7 por último, com `Fortaleza-CE` (UF em maiúscula) | Conforme o esperado |
+| 27 | opção `1`, ID `7` | `Ja existe um servico com o ID 7.`, sem pedir mais dados | Conforme o esperado |
+| 28 | opção `1`, ID `abc`, `0` ou `-5` | `ID invalido.` | Conforme o esperado |
+| 29 | opção `1`, ID `8`, nome vazio (só Enter) | `Campo obrigatorio. Tente novamente.` | Conforme o esperado |
+| 30 | opção `1`, ID `8`, nome `Teste`, categoria `9` | `Opcao invalida.` e o menu de categorias reaparece | Conforme o esperado |
+| 31 | opção `1`, ID `8`, nome `Teste`, categoria `1`, descrição, requisitos e cidade quaisquer, estado `1a` e depois `SP`, telefone e horário quaisquer | `Estado invalido. Digite 2 letras.`; ao informar `SP` o cadastro segue e termina com `Servico cadastrado com sucesso.` | Conforme o esperado |
 
 ### 11.6 Atualização
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 32 | opção `5`, ID `4`, campo `7`, `(19) 1111-1111` | `Servico atualizado com sucesso.`; opção `3` com ID `4` mostra o telefone novo | |
-| 33 | opção `5`, ID `7`, campo `1`, `Centro de Saude` | `Servico atualizado com sucesso.`; o nome muda | |
-| 34 | opção `5`, ID `7`, campo `6`, `xyz` e depois `Ce` | `Estado invalido. Digite 2 letras.` e depois atualiza para `CE` | |
-| 35 | opção `5`, ID `99` | `Nenhum servico encontrado com o ID 99.` | |
-| 36 | opção `5`, ID `abc` | `ID invalido.` | |
-| 37 | opção `5`, ID `1`, campo `0` | `Atualizacao cancelada.` | |
-| 38 | opção `5`, ID `1`, campo `9` | `Opcao invalida.` | |
+| 32 | opção `5`, ID `4`, campo `7`, `(19) 1111-1111` | `Servico atualizado com sucesso.`; opção `3` com ID `4` mostra o telefone novo | Conforme o esperado |
+| 33 | opção `5`, ID `7`, campo `1`, `Centro de Saude` | `Servico atualizado com sucesso.`; o nome muda | Conforme o esperado |
+| 34 | opção `5`, ID `7`, campo `6`, `xyz` e depois `Ce` | `Estado invalido. Digite 2 letras.` e depois atualiza para `CE` | Conforme o esperado |
+| 35 | opção `5`, ID `99` | `Nenhum servico encontrado com o ID 99.` | Conforme o esperado |
+| 36 | opção `5`, ID `abc` | `ID invalido.` | Conforme o esperado |
+| 37 | opção `5`, ID `1`, campo `0` | `Atualizacao cancelada.` | Conforme o esperado |
+| 38 | opção `5`, ID `1`, campo `9` | `Opcao invalida.` | Conforme o esperado |
 
 ### 11.7 Exclusão
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 39 | opção `6`, ID `99` | `Nenhum servico encontrado com o ID 99.` | |
-| 40 | opção `6`, ID `abc` | `ID invalido.` | |
-| 41 | opção `6`, ID `3` (nó do meio) | `Servico removido com sucesso.`; `2` lista sem o 3 | |
-| 42 | opção `6`, ID `1` (primeiro nó) | removido; `2` começa no 2 | |
-| 43 | opção `6`, ID `7` (último nó) | removido; `2` termina no 6 | |
-| 44 | opção `3`, ID `3` | `Nenhum servico encontrado com o ID 3.` | |
+| 39 | opção `6`, ID `99` | `Nenhum servico encontrado com o ID 99.` | Conforme o esperado |
+| 40 | opção `6`, ID `abc` | `ID invalido.` | Conforme o esperado |
+| 41 | opção `6`, ID `3` (nó do meio) | `Servico removido com sucesso.`; `2` lista sem o 3 | Conforme o esperado |
+| 42 | opção `6`, ID `1` (primeiro nó) | removido; `2` começa no 2 | Conforme o esperado |
+| 43 | opção `6`, ID `8` (último nó) | removido; `2` termina no 7 | Conforme o esperado |
+| 44 | opção `3`, ID `3` | `Nenhum servico encontrado com o ID 3.` | Conforme o esperado |
 
 ### 11.8 Persistência e lista vazia ao final
 
 | Nº | Entrada | Esperado | Observado |
 |---|---|---|---|
-| 45 | opção `0`, executar de novo e opção `2` | serviços 2, 4, 5 e 6, com o telefone novo do 4 | |
-| 46 | abrir o `servicos.txt` | 9 linhas por serviço, em ordem de ID (linhas 1, 10, 19 e 28 com `2`, `4`, `5` e `6`) | |
-| 47 | opção `6` para os IDs 2, 4, 5 e 6 e depois opção `2` | `Lista vazia.` | |
-| 48 | opção `0`, apagar o `servicos.txt` e executar | inicia sem erro e `2` mostra `Lista vazia.` | |
+| 45 | opção `0`, executar de novo e opção `2` | serviços 2, 4, 5, 6 e 7, com o telefone novo do 4 e o nome atualizado do 7 | Conforme o esperado |
+| 46 | abrir o `servicos.txt` | 9 linhas por serviço, em ordem de ID (linhas 1, 10, 19, 28 e 37 com `2`, `4`, `5`, `6` e `7`) | Conforme o esperado |
+| 47 | opção `6` para os IDs 2, 4, 5, 6 e 7 e depois opção `2` | `Lista vazia.` | Conforme o esperado |
+| 48 | opção `0`, apagar o `servicos.txt` e executar | inicia sem erro e `2` mostra `Lista vazia.` | Conforme o esperado |
