@@ -2,6 +2,17 @@
 
 Global Solution 2026.2 - Data Structures and Algorithms (DSA). Protótipo em C, executado no terminal.
 
+## Identificação Acadêmica
+**Disciplina**: Data Structures and Algorithms <br>
+**Curso**: Ciências da Computação - 1º Ano <br>
+**Turma**: 1CCPI <br>
+**Integrantes**:
+
+| Nome | RM |
+|------|----|
+| Kauanne Paula de Oliveira | 574191 |
+| Nayhely Estela Calle Castillo | 571416 |
+
 ## 1. Recorte escolhido
 
 O sistema cadastra **serviços de proteção e apoio à mulher em situação de violência** (delegacias, abrigos, apoio jurídico, saúde, apoio psicológico e canais de denúncia). Ele guarda informações dos **serviços**, e não de vítimas ou agressores, por isso não trata dados pessoais sensíveis.
@@ -9,7 +20,7 @@ O sistema cadastra **serviços de proteção e apoio à mulher em situação de 
 ## 2. Como compilar e executar
 
 ```
-gcc -Wall -Wextra main.c -o citizen_assist
+gcc main.c -o citizen_assist
 .\citizen_assist
 ```
 
@@ -72,21 +83,49 @@ Tratamentos: opção inválida, ID inválido ou duplicado, ID inexistente, campo
 
 **Insertion Sort** (`ordenar_lista`): o início da lista é a parte já ordenada. A cada passo, o próximo nó é comparado com o último da parte ordenada; se já está no lugar, a parte ordenada cresce, senão o programa acha a posição correta e desloca os dados com trocas (`trocar_dados`) até encaixá-lo. A função recebe o critério (ID crescente ou nome A-Z) e, no nome, a comparação ignora maiúsculas e minúsculas (`comparar_texto`).
 
-## 7. Persistência
+## 7. Análise de complexidade (Big-O)
+
+| Operação | Função | Melhor caso | Pior caso |
+|---|---|---|---|
+| Inserção no final | `inserir_final` | O(1) (lista vazia) | O(n) |
+| Cadastro completo | `cadastrar` | O(n) | O(n) |
+| Busca por ID | `buscar_por_id` | O(1) (primeiro nó) | O(n) |
+| Pesquisa por categoria ou estado | `pesquisar_por_categoria`, `pesquisar_por_estado` | O(n) | O(n) |
+| Remoção | `excluir` | O(1) (primeiro nó) | O(n) |
+| Ordenação (Insertion Sort) | `ordenar_lista` | O(n) (já ordenada) | O(n²) (ordem inversa) |
+| Exibir ordenado por nome | `ordenar` | O(n) | O(n²) |
+| Percurso | `listar` | O(n) | O(n) |
+| Análise (indicador) | `analisar` | O(n) | O(n) |
+| Gravar no arquivo | `salvar` | O(n) | O(n) |
+| Carregar do arquivo | `carregar` | O(n²) | O(n²) |
+
+**Inserção.** A inserção é feita no final. Como a lista não guarda o ponteiro do último nó, `inserir_final` percorre a lista até encontrá-lo, o que custa O(n); só na lista vazia o novo nó vira a cabeça em O(1). O cadastro completo também é O(n): busca de ID duplicado (O(n)), inserção (O(n)), reordenação por ID e gravação no arquivo (ambas O(n)). A reordenação é linear porque, depois da inserção, no máximo um nó está fora de lugar. Com um ponteiro para o último nó a inserção cairia para O(1), mas isso não foi implementado.
+
+**Busca.** A busca é sequencial: começa na cabeça e segue `proximo`. Na busca por ID, o melhor caso é O(1) (registro no primeiro nó) e o pior é O(n) (último nó ou ID inexistente). Nas pesquisas por categoria e estado, a lista é sempre percorrida inteira, pois podem existir vários resultados, então o custo é O(n) em qualquer caso. A busca binária não se aplica, pois a lista encadeada não dá acesso direto ao elemento do meio.
+
+**Remoção.** `excluir` percorre a lista guardando o nó anterior até achar o ID (O(n) no pior caso, O(1) se for o primeiro nó). Religar o ponteiro do anterior (ou a cabeça) e liberar o nó com `free` custa O(1). O custo total é O(n).
+
+**Ordenação.** Foi usado o Insertion Sort com troca de dados entre os nós (`trocar_dados`). No melhor caso (lista já ordenada), cada nó é comparado só com o último da parte ordenada, o que dá n-1 comparações e O(n). No pior caso (ordem inversa), cada nó é deslocado por toda a parte ordenada, o que dá cerca de n(n-1)/2 comparações e trocas, ou seja, O(n²). O caso médio também é O(n²). O espaço adicional é O(1), pois só há ponteiros auxiliares e uma estrutura temporária na troca. O algoritmo é estável, porque a comparação usa `<=` e registros iguais mantêm a ordem relativa. Cada troca copia o registro inteiro, custo constante por troca que não muda a classe de complexidade. A opção 7 faz duas ordenações (por nome e de volta por ID) mais um percurso, então custa O(n²) no pior caso.
+
+**Demais operações.** `listar`, `analisar` (um percurso com no máximo 6 comparações por nó) e `salvar` são O(n). A atualização de um campo custa O(n) pela busca do ID, e a regravação do arquivo também é O(n). `carregar` é O(n²), pois chama `inserir_final` (O(n)) para cada um dos n registros lidos.
+
+**Observações.** *n* é a quantidade de serviços na lista. A comparação de textos é tratada como custo constante, porque os campos têm tamanho fixo (no máximo 119 caracteres). A leitura do teclado é desconsiderada. A análise segue a implementação efetiva: lista simplesmente encadeada sem ponteiro para o último nó.
+
+## 8. Persistência
 
 Os dados ficam em `servicos.txt`, **9 linhas por serviço**, na ordem: id, nome, categoria, descricao, requisitos, cidade, estado, telefone, horario. O arquivo é lido ao iniciar e gravado após cada cadastro, atualização ou exclusão, sempre em ordem de ID.
 
-## 8. Limitações conhecidas
+## 9. Limitações conhecidas
 
 - A comparação de nomes não trata acentos. Recomenda-se cadastrar sem acento.
 - Textos maiores que o campo são cortados.
 - Um ID digitado como `12abc` é lido como `12`.
 
-## 9. Dados de exemplo para os testes
+## 10. Dados de exemplo para os testes
 
 Os dados abaixo são **fictícios** (telefones e descrições ilustrativos) e servem só para testar o sistema. Há duas formas de usá-los.
 
-### 9.1 Carregar direto pelo arquivo
+### 10.1 Carregar direto pelo arquivo
 
 Crie o arquivo `servicos.txt` na pasta de onde o programa é executado com o conteúdo abaixo (9 linhas por serviço) e inicie o programa. Os 6 serviços já aparecem na lista.
 
@@ -147,7 +186,7 @@ MG
 8h as 17h
 ```
 
-### 9.2 Cadastrar pelo menu (opção 1)
+### 10.2 Cadastrar pelo menu (opção 1)
 
 Apague o `servicos.txt` (se existir) e cadastre os serviços abaixo. O programa pede os campos nesta ordem: ID, Nome, Categoria (número), Descrição, Requisitos, Cidade, Estado, Telefone e Horário.
 
@@ -164,7 +203,7 @@ Números das categorias: 1 Delegacia e seguranca, 2 Acolhimento e abrigo, 3 Apoi
 
 Nenhum serviço de Saúde ou Apoio psicológico foi incluído de propósito, para que a análise mostre categorias com zero.
 
-### 9.3 Resultados esperados com esses 6 serviços
+### 10.3 Resultados esperados com esses 6 serviços
 
 | Ação | Resultado esperado |
 |---|---|
