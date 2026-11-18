@@ -305,8 +305,7 @@ void pesquisar_por_estado(Servico *cabeca) {
     Servico *atual = cabeca;
     while (atual != NULL) {
         if (strcmp(atual->estado, estado) == 0) {
-            printf("ID: %d | %s | %s-%s\n",
-                   atual->id, atual->nome, atual->cidade, atual->estado);
+            exibir_resumo(atual);
             achou++;
         }
         atual = atual->proximo;
@@ -460,7 +459,7 @@ void ordenar_lista(Servico *cabeca, int criterio) {
         if (comparar(ultimo, atual, criterio) <= 0) {
             ultimo = atual; // ja esta na posicao certa
         } else {
-            // acha o primeiro no da parte ordenada com nome maior que o atual
+            // acha o primeiro no da parte ordenada que deve vir depois do atual
             Servico *pos = cabeca;
             while (comparar(pos, atual, criterio) <= 0) {
                 pos = pos->proximo;
@@ -525,7 +524,7 @@ int ler_linha_arquivo(FILE *arq, char *dest, int tam) {
     if (fgets(dest, tam, arq) == NULL) {
         return 0;
     }
-     if (strchr(dest, '\n') == NULL) {
+    if (strchr(dest, '\n') == NULL) {
         int c;
         // descarta o resto da linha que nao coube no campo
         while ((c = fgetc(arq)) != '\n' && c != EOF) { }
