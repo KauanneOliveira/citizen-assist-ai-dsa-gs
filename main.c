@@ -87,23 +87,159 @@ void liberar_lista(Servico *cabeca) {
     }
 }
 
+// ENTRADA DE DADOS E VALIDACAO 
+#define QTD_CATEGORIAS 6
+
+const char *CATEGORIAS[QTD_CATEGORIAS] = {
+    "Delegacia e seguranca",
+    "Acolhimento e abrigo",
+    "Apoio juridico",
+    "Saude",
+    "Apoio psicologico",
+    "Canal de denuncia"
+};
+
+// descarta o que sobrou na linha digitada
+void limpar_buffer(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
+}
+
+// le texto com espacos e remove o \n
+void ler_texto(const char *msg, char *dest, int tam) {
+    printf("%s", msg);
+    if (fgets(dest, tam, stdin) == NULL) {
+        dest[0] = '\0';
+        return;
+    }
+    if (strchr(dest, '\n') == NULL) {
+        limpar_buffer();  //  texto maior que o campo: descarta o excesso
+    }
+    dest[strcspn(dest, "\n")] = '\0';
+}
+
+// repete ate o usuario digitar algo
+void ler_texto_obrigatorio(const char *msg, char *dest, int tam) {
+    do {
+        ler_texto(msg, dest, tam);
+        if (dest[0] == '\0') {
+            printf("Campo obrigatorio. Tente novamente.\n");
+        }
+    } while (dest[0] == '\0');
+}
+
+// le um inteiro e retorna 1 se valido, 0 se digitou letras
+int ler_inteiro(const char *msg, int *valor) {
+    printf("%s", msg);
+    if (scanf("%d", valor) != 1) {
+        limpar_buffer();
+        return 0;
+    }
+    limpar_buffer();
+    return 1;
+}
+
+// busca sequencial por ID; retorna o no ou NULL
+Servico *buscar_por_id(Servico *cabeca, int id) {
+    Servico *atual = cabeca;
+    while (atual != NULL) {
+        if (atual->id == id) {
+            return atual;
+        }
+        atual = atual->proximo;
+    }
+    return NULL;
+}
+
+// mostra o menu de categorias e copia a escolhida
+void escolher_categoria(char *dest) {
+    int op;
+    while (1) {
+        printf("Categorias:\n");
+        for (int i = 0; i < QTD_CATEGORIAS; i++) {
+            printf("  %d - %s\n", i + 1, CATEGORIAS[i]);
+        }
+        if (ler_inteiro("Escolha a categoria: ", &op) && op >= 1 && op <= QTD_CATEGORIAS) {
+            strcpy(dest, CATEGORIAS[op - 1]);
+            return;
+        }
+        printf("Opcao invalida.\n");
+    }
+}
+
+// le a UF: exatamente 2 letras e guarda em maiuscula
+void ler_estado(char *dest) {
+    char tmp[20];
+    while (1) {
+        ler_texto("Estado (sigla UF, ex.: SP): ", tmp, sizeof(tmp));
+        if (strlen(tmp) == 2) {
+            char a = tmp[0], b = tmp[1];
+            if (a >= 'a' && a <= 'z') a = a - 32;
+            if (b >= 'a' && b <= 'z') b = b - 32;
+            if (a >= 'A' && a <= 'Z' && b >= 'A' && b <= 'Z') {
+                dest[0] = a;
+                dest[1] = b;
+                dest[2] = '\0';
+                return;
+            }
+        }
+        printf("Estado invalido. Digite 2 letras.\n");
+    }
+}
+
+// cadastra um servico lendo do teclado e devolve a cabeca
+Servico *cadastrar(Servico *cabeca) {
+    int id;
+    char nome[T_NOME], categoria[T_CATEGORIA], descricao[T_DESC];
+    char requisitos[T_REQ], cidade[T_CIDADE], estado[T_UF];
+    char telefone[T_TEL], horario[T_HORARIO];
+
+    if (!ler_inteiro("ID (numero positivo): ", &id) || id <= 0) {
+        printf("ID invalido.\n");
+        return cabeca;
+    }
+    if (buscar_por_id(cabeca, id) != NULL) {
+        printf("Ja existe um servico com o ID %d.\n", id);
+        return cabeca;
+    }
+
+    ler_texto_obrigatorio("Nome: ", nome, T_NOME);
+    escolher_categoria(categoria);
+    ler_texto_obrigatorio("Descricao: ", descricao, T_DESC);
+    ler_texto_obrigatorio("Requisitos: ", requisitos, T_REQ);
+    ler_texto_obrigatorio("Cidade: ", cidade, T_CIDADE);
+    ler_estado(estado);
+    ler_texto_obrigatorio("Telefone: ", telefone, T_TEL);
+    ler_texto_obrigatorio("Horario de funcionamento: ", horario, T_HORARIO);
+
+    Servico *novo = criar_no(id, nome, categoria, descricao, requisitos,
+                             cidade, estado, telefone, horario);
+    if (novo == NULL) {
+        printf("Erro: memoria insuficiente.\n");
+        return cabeca;
+    }
+    printf("Servico cadastrado com sucesso.\n");
+    return inserir_final(cabeca, novo);
+}
+
 // MAIN   
 int main(void) {
     Servico *lista = NULL;
+    int op;
 
-    listar(lista);
-
-    lista = inserir_final(lista, criar_no(1, "Ligue 180", "Canal de denuncia",
-            "Central de atendimento", "Nenhum", "Brasilia", "DF", "180", "24h"));
-    lista = inserir_final(lista, criar_no(2, "Delegacia da Mulher", "Delegacia e seguranca",
-            "Atendimento policial", "Documento com foto", "Sao Paulo", "SP", "(11) 0000-0000", "24h"));
-    lista = inserir_final(lista, criar_no(3, "Casa da Mulher Brasileira", "Acolhimento e abrigo",
-            "Atendimento integrado", "Nenhum", "Campo Grande", "MS", "(67) 0000-0000", "24h"));
-
-    printf("--- Apos 3 insercoes ---\n");
-    listar(lista);
+    do {
+        printf("\n1 - Cadastrar\n2 - Listar\n0 - Sair\n");
+        if (!ler_inteiro("Opcao: ", &op)) {
+            op = -1;
+        }
+        switch (op) {
+            case 1: lista = cadastrar(lista); break;
+            case 2: listar(lista); break;
+            case 0: break;
+            default: printf("Opcao invalida.\n");
+        }
+    } while (op != 0);
 
     liberar_lista(lista);
-    printf("Memoria liberada.\n");
     return 0;
 }
