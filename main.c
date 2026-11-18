@@ -222,19 +222,124 @@ Servico *cadastrar(Servico *cabeca) {
     return inserir_final(cabeca, novo);
 }
 
+// mostra todos os campos de um servico
+void exibir_detalhe(Servico *s) {
+    printf("ID: %d\n", s->id);
+    printf("Nome: %s\n", s->nome);
+    printf("Categoria: %s\n", s->categoria);
+    printf("Descricao: %s\n", s->descricao);
+    printf("Requisitos: %s\n", s->requisitos);
+    printf("Local: %s-%s\n", s->cidade, s->estado);
+    printf("Telefone: %s\n", s->telefone);
+    printf("Horario: %s\n", s->horario);
+}
+
+// consulta por id usando a busca sequencial
+void consultar_por_id(Servico *cabeca) {
+    int id;
+
+    if (cabeca == NULL) {
+        printf("Lista vazia.\n");
+        return;
+    }
+    if (!ler_inteiro("ID para consulta: ", &id)) {
+        printf("ID invalido.\n");
+        return;
+    }
+    Servico *encontrado = buscar_por_id(cabeca, id);
+    if (encontrado == NULL) {
+        printf("Nenhum servico encontrado com o ID %d.\n", id);
+        return;
+    }
+    exibir_detalhe(encontrado);
+}
+
+/* pesquisa por categoria: percorre a lista inteira (busca sequencial)
+   e mostra todos os servicos que combinam */
+void pesquisar_por_categoria(Servico *cabeca) {
+    char categoria[T_CATEGORIA];
+    int achou = 0;
+
+    if (cabeca == NULL) {
+        printf("Lista vazia.\n");
+        return;
+    }
+    escolher_categoria(categoria);
+
+    Servico *atual = cabeca;
+    while (atual != NULL) {
+        if (strcmp(atual->categoria, categoria) == 0) {
+            printf("ID: %d | %s | %s-%s\n",
+                   atual->id, atual->nome, atual->cidade, atual->estado);
+            achou++;
+        }
+        atual = atual->proximo;
+    }
+    if (achou == 0) {
+        printf("Nenhum servico encontrado na categoria %s.\n", categoria);
+    } else {
+        printf("Total encontrado: %d\n", achou);
+    }
+}
+
+// pesquisa por estado, mesma logica da pesquisa por categoria
+void pesquisar_por_estado(Servico *cabeca) {
+    char estado[T_UF];
+    int achou = 0;
+
+    if (cabeca == NULL) {
+        printf("Lista vazia.\n");
+        return;
+    }
+    ler_estado(estado);
+
+    Servico *atual = cabeca;
+    while (atual != NULL) {
+        if (strcmp(atual->estado, estado) == 0) {
+            printf("ID: %d | %s | %s-%s\n",
+                   atual->id, atual->nome, atual->cidade, atual->estado);
+            achou++;
+        }
+        atual = atual->proximo;
+    }
+    if (achou == 0) {
+        printf("Nenhum servico encontrado no estado %s.\n", estado);
+    } else {
+        printf("Total encontrado: %d\n", achou);
+    }
+}
+
+// submenu da opcao pesquisar
+void menu_pesquisa(Servico *cabeca) {
+    int op;
+
+    printf("\n1 - Por categoria\n2 - Por estado\n0 - Voltar\n");
+    if (!ler_inteiro("Opcao: ", &op)) {
+        op = -1;
+    }
+    switch (op) {
+        case 1: pesquisar_por_categoria(cabeca); break;
+        case 2: pesquisar_por_estado(cabeca); break;
+        case 0: break;
+        default: printf("Opcao invalida.\n");
+    }
+}
+
 // MAIN   
 int main(void) {
     Servico *lista = NULL;
     int op;
 
     do {
-        printf("\n1 - Cadastrar\n2 - Listar\n0 - Sair\n");
+        printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n0 - Sair\n");
         if (!ler_inteiro("Opcao: ", &op)) {
             op = -1;
         }
         switch (op) {
             case 1: lista = cadastrar(lista); break;
             case 2: listar(lista); break;
+            case 3: consultar_por_id(lista); break;
+            case 4: menu_pesquisa(lista); break;
             case 0: break;
             default: printf("Opcao invalida.\n");
         }
