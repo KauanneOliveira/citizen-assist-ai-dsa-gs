@@ -11,6 +11,7 @@
 #define T_UF 3
 #define T_TEL 20
 #define T_HORARIO 30
+#define ARQUIVO "servicos.txt"
 
 typedef struct Servico {
     int id;
@@ -201,7 +202,7 @@ Servico *cadastrar(Servico *cabeca) {
     char requisitos[T_REQ], cidade[T_CIDADE], estado[T_UF];
     char telefone[T_TEL], horario[T_HORARIO];
 
-    if (!ler_inteiro("\nID (numero positivo): ", &id) || id <= 0) {
+    if (!ler_inteiro("ID (numero positivo): ", &id) || id <= 0) {
         printf("ID invalido.\n");
         return cabeca;
     }
@@ -407,25 +408,128 @@ Servico *excluir(Servico *cabeca) {
     return cabeca;
 }
 
+// formata o titulo da opcao escolhida
+void titulo(const char *texto) {
+    printf("\n\t\t%s\n", texto);
+}
+
+// le uma linha do arquivo e remove o \n e retorna 0 se acabou o arquivo
+int ler_linha_arquivo(FILE *arq, char *dest, int tam) {
+    if (fgets(dest, tam, arq) == NULL) {
+        return 0;
+    }
+     if (strchr(dest, '\n') == NULL) {
+        int c;
+        // descarta o resto da linha que nao coube no campo
+        while ((c = fgetc(arq)) != '\n' && c != EOF) { }
+    }
+    dest[strcspn(dest, "\n")] = '\0';
+    return 1;
+}
+
+/* grava a lista inteira no arquivo
+   retorna 1 se deu certo e 0 se nao conseguiu abrir */
+int salvar(Servico *cabeca) {
+    FILE *arq = fopen(ARQUIVO, "w");
+    if (arq == NULL) {
+        printf("Erro ao salvar o arquivo.\n");
+        return 0;
+    }
+    Servico *atual = cabeca;
+    while (atual != NULL) {
+        fprintf(arq, "%d\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+                atual->id, atual->nome, atual->categoria, atual->descricao,
+                atual->requisitos, atual->cidade, atual->estado,
+                atual->telefone, atual->horario);
+        atual = atual->proximo;
+    }
+    fclose(arq);
+    return 1;
+}
+
+/* le o arquivo e monta a lista encadeada;
+   se o arquivo nao existe (primeira execucao), devolve lista vazia */
+Servico *carregar(void) {
+    Servico *cabeca = NULL;
+    FILE *arq = fopen(ARQUIVO, "r");
+    if (arq == NULL) {
+        return NULL;
+    }
+
+    int id, c;
+    char nome[T_NOME], categoria[T_CATEGORIA], descricao[T_DESC];
+    char requisitos[T_REQ], cidade[T_CIDADE], estado[T_UF];
+    char telefone[T_TEL], horario[T_HORARIO];
+
+    while (fscanf(arq, "%d", &id) == 1) {
+        // descarta o resto da linha do id
+        while ((c = fgetc(arq)) != '\n' && c != EOF) { }
+
+        if (!ler_linha_arquivo(arq, nome, T_NOME) ||
+            !ler_linha_arquivo(arq, categoria, T_CATEGORIA) ||
+            !ler_linha_arquivo(arq, descricao, T_DESC) ||
+            !ler_linha_arquivo(arq, requisitos, T_REQ) ||
+            !ler_linha_arquivo(arq, cidade, T_CIDADE) ||
+            !ler_linha_arquivo(arq, estado, T_UF) ||
+            !ler_linha_arquivo(arq, telefone, T_TEL) ||
+            !ler_linha_arquivo(arq, horario, T_HORARIO)) {
+            break; // registro incompleto no arquivo
+        }
+
+        Servico *novo = criar_no(id, nome, categoria, descricao, requisitos,
+                                 cidade, estado, telefone, horario);
+        if (novo == NULL) {
+            break;
+        }
+        cabeca = inserir_final(cabeca, novo);
+    }
+    fclose(arq);
+    return cabeca;
+}
+
 // MAIN   
 int main(void) {
-    Servico *lista = NULL;
+    Servico *lista = carregar();
     int op;
-""
+
     do {
         printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n5 - Atualizar\n6 - Excluir\n0 - Sair\n");
         if (!ler_inteiro("Opcao: ", &op)) {
             op = -1;
         }
         switch (op) {
-            case 1: lista = cadastrar(lista); break;
-            case 2: listar(lista); break;
-            case 3: consultar_por_id(lista); break;
-            case 4: menu_pesquisa(lista); break;
-            case 5: atualizar(lista); break;
-            case 6: lista = excluir(lista); break;
-            case 0: break;
-            default: printf("Opcao invalida.\n");
+            case 1:
+                titulo("CADASTRO");
+                lista = cadastrar(lista);
+                salvar(lista);
+                break;
+            case 2:
+                titulo("LISTAR");
+                listar(lista);
+                break;
+            case 3:
+                titulo("CONSULTA POR ID");
+                consultar_por_id(lista);
+                break;
+            case 4:
+                titulo("PESQUISAR");
+                menu_pesquisa(lista);
+                break;
+            case 5:
+                titulo("ATUALIZAR");
+                atualizar(lista);
+                salvar(lista);
+                break;
+            case 6:
+                titulo("EXCLUIR");
+                lista = excluir(lista);
+                salvar(lista);
+                break;
+            case 0:
+               printf("\nENCERRAR");
+                break;
+            default: 
+                printf("Opcao invalida.\n");
         }
     } while (op != 0);
 
