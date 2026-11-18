@@ -201,7 +201,7 @@ Servico *cadastrar(Servico *cabeca) {
     char requisitos[T_REQ], cidade[T_CIDADE], estado[T_UF];
     char telefone[T_TEL], horario[T_HORARIO];
 
-    if (!ler_inteiro("ID (numero positivo): ", &id) || id <= 0) {
+    if (!ler_inteiro("\nID (numero positivo): ", &id) || id <= 0) {
         printf("ID invalido.\n");
         return cabeca;
     }
@@ -330,13 +330,90 @@ void menu_pesquisa(Servico *cabeca) {
     }
 }
 
+// atualiza um unico campo do servico (o id nao pode ser alterado)
+void atualizar(Servico *cabeca) {
+    int id, op;
+
+    if (cabeca == NULL) {
+        printf("Lista vazia.\n");
+        return;
+    }
+    if (!ler_inteiro("ID do servico a atualizar: ", &id)) {
+        printf("ID invalido.\n");
+        return;
+    }
+    Servico *s = buscar_por_id(cabeca, id);
+    if (s == NULL) {
+        printf("Nenhum servico encontrado com o ID %d.\n", id);
+        return;
+    }
+
+    printf("\nServico atual:\n");
+    exibir_detalhe(s);
+    printf("Campo para alterar:\n");
+    printf("\t1 - Nome\n\t2 - Categoria\n\t3 - Descricao\n\t4 - Requisitos\n");
+    printf("\t5 - Cidade\n\t6 - Estado\n\t7 - Telefone\n\t8 - Horario\n\t0 - Cancelar\n");
+    if (!ler_inteiro("Opcao: ", &op)) {
+        op = -1;
+    }
+
+    switch (op) {
+        case 1: ler_texto_obrigatorio("Novo nome: ", s->nome, T_NOME); break;
+        case 2: escolher_categoria(s->categoria); break;
+        case 3: ler_texto_obrigatorio("Nova descricao: ", s->descricao, T_DESC); break;
+        case 4: ler_texto_obrigatorio("Novos requisitos: ", s->requisitos, T_REQ); break;
+        case 5: ler_texto_obrigatorio("Nova cidade: ", s->cidade, T_CIDADE); break;
+        case 6: ler_estado(s->estado); break;
+        case 7: ler_texto_obrigatorio("Novo telefone: ", s->telefone, T_TEL); break;
+        case 8: ler_texto_obrigatorio("Novo horario: ", s->horario, T_HORARIO); break;
+        case 0: printf("Atualizacao cancelada.\n"); return;
+        default: printf("Opcao invalida.\n"); return;
+    }
+    printf("Servico atualizado com sucesso.\n");
+}
+
+/* remove o servico pelo id, religando os ponteiros para manter a lista integra;
+   devolve a cabeca (que muda se o primeiro no for removido) */
+Servico *excluir(Servico *cabeca) {
+    int id;
+
+    if (cabeca == NULL) {
+        printf("Lista vazia.\n");
+        return cabeca;
+    }
+    if (!ler_inteiro("ID do servico a excluir: ", &id)) {
+        printf("ID invalido.\n");
+        return cabeca;
+    }
+
+    Servico *atual = cabeca;
+    Servico *anterior = NULL;
+    while (atual != NULL && atual->id != id) {
+        anterior = atual;
+        atual = atual->proximo;
+    }
+    if (atual == NULL) {
+        printf("Nenhum servico encontrado com o ID %d.\n", id);
+        return cabeca;
+    }
+
+    if (anterior == NULL) {
+        cabeca = atual->proximo; // removendo o primeiro no
+    } else {
+        anterior->proximo = atual->proximo;
+    }
+    free(atual);
+    printf("Servico removido com sucesso.\n");
+    return cabeca;
+}
+
 // MAIN   
 int main(void) {
     Servico *lista = NULL;
     int op;
-
+""
     do {
-        printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n0 - Sair\n");
+        printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n5 - Atualizar\n6 - Excluir\n0 - Sair\n");
         if (!ler_inteiro("Opcao: ", &op)) {
             op = -1;
         }
@@ -345,6 +422,8 @@ int main(void) {
             case 2: listar(lista); break;
             case 3: consultar_por_id(lista); break;
             case 4: menu_pesquisa(lista); break;
+            case 5: atualizar(lista); break;
+            case 6: lista = excluir(lista); break;
             case 0: break;
             default: printf("Opcao invalida.\n");
         }
