@@ -62,6 +62,15 @@ Servico *inserir_final(Servico *cabeca, Servico *novo) {
     return cabeca;
 }
 
+// formata a exibicao
+void exibir_resumo(Servico *s) {
+    printf("ID %d - %s\n", s->id, s->nome);
+    printf("\tCategoria: %s\n", s->categoria);
+    printf("\tLocal: %s-%s\n", s->cidade, s->estado);
+    printf("\tTelefone: %s\n", s->telefone);
+    printf("\tHorario: %s\n\n", s->horario);
+}
+
 // percorre e exibe todos os nos  
 void listar(Servico *cabeca) {
     if (cabeca == NULL) {
@@ -70,9 +79,7 @@ void listar(Servico *cabeca) {
     }
     Servico *atual = cabeca;
     while (atual != NULL) {
-        printf("ID: %d | %s | %s | %s-%s\n",
-               atual->id, atual->nome, atual->categoria,
-               atual->cidade, atual->estado);
+        exibir_resumo(atual);
         atual = atual->proximo;
     }
 }
@@ -224,14 +231,13 @@ Servico *cadastrar(Servico *cabeca) {
 
 // mostra todos os campos de um servico
 void exibir_detalhe(Servico *s) {
-    printf("ID: %d\n", s->id);
-    printf("Nome: %s\n", s->nome);
-    printf("Categoria: %s\n", s->categoria);
-    printf("Descricao: %s\n", s->descricao);
-    printf("Requisitos: %s\n", s->requisitos);
-    printf("Local: %s-%s\n", s->cidade, s->estado);
-    printf("Telefone: %s\n", s->telefone);
-    printf("Horario: %s\n", s->horario);
+    printf("ID %d - %s\n", s->id, s->nome);
+    printf("\tCategoria: %s\n", s->categoria);
+    printf("\tDescricao: %s\n", s->descricao);
+    printf("\tRequisitos: %s\n", s->requisitos);
+    printf("\tLocal: %s-%s\n", s->cidade, s->estado);
+    printf("\tTelefone: %s\n", s->telefone);
+    printf("\tHorario: %s\n\n", s->horario);
 }
 
 // consulta por id usando a busca sequencial
@@ -269,8 +275,7 @@ void pesquisar_por_categoria(Servico *cabeca) {
     Servico *atual = cabeca;
     while (atual != NULL) {
         if (strcmp(atual->categoria, categoria) == 0) {
-            printf("ID: %d | %s | %s-%s\n",
-                   atual->id, atual->nome, atual->cidade, atual->estado);
+            exibir_resumo(atual);
             achou++;
         }
         atual = atual->proximo;
