@@ -215,3 +215,97 @@ Nenhum serviço de Saúde ou Apoio psicológico foi incluído de propósito, par
 | Opção 4, por estado, `RJ` | `Nenhum servico encontrado no estado RJ.` |
 | Opção 3, ID `99` | `Nenhum servico encontrado com o ID 99.` |
 | Opção 1, ID `1` de novo | `Ja existe um servico com o ID 1.` |
+
+## 11. Evidências de testes
+
+Os testes seguem a ordem abaixo e usam os dados da seção 10. Os grupos 11.1 e 11.2 partem de uma execução **sem** `servicos.txt`; do grupo 11.3 em diante, o `servicos.txt` é o da seção 10.1 (6 serviços). A coluna "Observado" é preenchida após a execução (os prints ficam na pasta `evidencias/`).
+
+### 11.1 Lista vazia (sem `servicos.txt`)
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 1 | opção `2` | `Lista vazia.` | |
+| 2 | opção `3` | `Lista vazia.` | |
+| 3 | opção `4`, depois `1` | `Lista vazia.` | |
+| 4 | opção `4`, depois `2` | `Lista vazia.` | |
+| 5 | opção `5` | `Lista vazia.` | |
+| 6 | opção `6` | `Lista vazia.` | |
+| 7 | opção `7` | `Lista vazia.` | |
+| 8 | opção `8` | `Lista vazia.`, `Total de servicos: 0` e as 6 categorias com `0` | |
+
+### 11.2 Menu principal
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 9 | opção `9` | `Opcao invalida.` e o menu volta | |
+| 10 | opção `abc` | `Opcao invalida.` e o menu volta | |
+
+### 11.3 Carga, consulta e pesquisa (com os 6 serviços da seção 10.1)
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 11 | iniciar o programa e opção `2` | os 6 serviços na ordem de ID (1 a 6), carregados do arquivo | |
+| 12 | opção `3`, ID `3` | os campos completos de Casa da Mulher Brasileira | |
+| 13 | opção `3`, ID `99` | `Nenhum servico encontrado com o ID 99.` | |
+| 14 | opção `3`, ID `abc` | `ID invalido.` | |
+| 15 | opção `4`, `1`, categoria `1` | serviços 2 e 4 e `Total encontrado: 2` | |
+| 16 | opção `4`, `1`, categoria `4` | `Nenhum servico encontrado na categoria Saude.` | |
+| 17 | opção `4`, `1`, categoria `9` | `Opcao invalida.` e o menu de categorias reaparece | |
+| 18 | opção `4`, `2`, estado `sp` | serviços 2 e 4 e `Total encontrado: 2` (aceita minúscula) | |
+| 19 | opção `4`, `2`, estado `RJ` | `Nenhum servico encontrado no estado RJ.` | |
+| 20 | opção `4`, `2`, estado `SAO` | `Estado invalido. Digite 2 letras.` e pede de novo | |
+| 21 | opção `4`, depois `9` | `Opcao invalida.` | |
+
+### 11.4 Ordenação e análise
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 22 | opção `7` | `Lista ordenada por nome (A-Z):` com os IDs 5, 3, 6, 2, 4, 1 (`defensoria publica`, em minúsculo, fica entre Casa e Delegacia) | |
+| 23 | opção `2`, logo depois | IDs 1, 2, 3, 4, 5, 6 (a lista volta à ordem de ID) | |
+| 24 | opção `8` | `Total de servicos: 6`; Delegacia e seguranca: 2; Acolhimento e abrigo: 2; Apoio juridico: 1; Saude: 0; Apoio psicologico: 0; Canal de denuncia: 1 | |
+
+### 11.5 Cadastro
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 25 | opção `1`, ID `7`, nome `Centro de Saude da Mulher`, categoria `4`, descrição `Atendimento de saude`, requisitos `Documento com foto`, cidade `Fortaleza`, estado `ce`, telefone `(85) 0000-0000`, horário `8h as 17h` | `Servico cadastrado com sucesso.` | |
+| 26 | opção `2` | serviço 7 por último, com `Fortaleza-CE` (UF em maiúscula) | |
+| 27 | opção `1`, ID `7` | `Ja existe um servico com o ID 7.`, sem pedir mais dados | |
+| 28 | opção `1`, ID `abc`, `0` ou `-5` | `ID invalido.` | |
+| 29 | opção `1`, ID `8`, nome vazio (só Enter) | `Campo obrigatorio. Tente novamente.` | |
+| 30 | opção `1`, ID `8`, nome `Teste`, categoria `9` | `Opcao invalida.` e o menu de categorias reaparece | |
+| 31 | opção `1`, ID `8`, nome `Teste`, categoria `1`, descrição, requisitos e cidade quaisquer, estado `1a` | `Estado invalido. Digite 2 letras.` e pede de novo | |
+
+Após o teste 31, cancele o cadastro do ID 8 informando um estado válido ou encerrando e removendo o serviço pela opção 6.
+
+### 11.6 Atualização
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 32 | opção `5`, ID `4`, campo `7`, `(19) 1111-1111` | `Servico atualizado com sucesso.`; opção `3` com ID `4` mostra o telefone novo | |
+| 33 | opção `5`, ID `7`, campo `1`, `Centro de Saude` | `Servico atualizado com sucesso.`; o nome muda | |
+| 34 | opção `5`, ID `7`, campo `6`, `xyz` e depois `Ce` | `Estado invalido. Digite 2 letras.` e depois atualiza para `CE` | |
+| 35 | opção `5`, ID `99` | `Nenhum servico encontrado com o ID 99.` | |
+| 36 | opção `5`, ID `abc` | `ID invalido.` | |
+| 37 | opção `5`, ID `1`, campo `0` | `Atualizacao cancelada.` | |
+| 38 | opção `5`, ID `1`, campo `9` | `Opcao invalida.` | |
+
+### 11.7 Exclusão
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 39 | opção `6`, ID `99` | `Nenhum servico encontrado com o ID 99.` | |
+| 40 | opção `6`, ID `abc` | `ID invalido.` | |
+| 41 | opção `6`, ID `3` (nó do meio) | `Servico removido com sucesso.`; `2` lista sem o 3 | |
+| 42 | opção `6`, ID `1` (primeiro nó) | removido; `2` começa no 2 | |
+| 43 | opção `6`, ID `7` (último nó) | removido; `2` termina no 6 | |
+| 44 | opção `3`, ID `3` | `Nenhum servico encontrado com o ID 3.` | |
+
+### 11.8 Persistência e lista vazia ao final
+
+| Nº | Entrada | Esperado | Observado |
+|---|---|---|---|
+| 45 | opção `0`, executar de novo e opção `2` | serviços 2, 4, 5 e 6, com o telefone novo do 4 | |
+| 46 | abrir o `servicos.txt` | 9 linhas por serviço, em ordem de ID (linhas 1, 10, 19 e 28 com `2`, `4`, `5` e `6`) | |
+| 47 | opção `6` para os IDs 2, 4, 5 e 6 e depois opção `2` | `Lista vazia.` | |
+| 48 | opção `0`, apagar o `servicos.txt` e executar | inicia sem erro e `2` mostra `Lista vazia.` | |
