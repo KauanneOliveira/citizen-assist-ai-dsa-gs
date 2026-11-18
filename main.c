@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 // ESTRUTURA DO REGISTRO (NO DA LISTA)
 #define T_NOME 60
@@ -12,6 +13,8 @@
 #define T_TEL 20
 #define T_HORARIO 30
 #define ARQUIVO "servicos.txt"
+#define POR_ID 1
+#define POR_NOME 2
 
 typedef struct Servico {
     int id;
@@ -408,6 +411,28 @@ Servico *excluir(Servico *cabeca) {
     return cabeca;
 }
 
+// compara dois textos ignorando maiusculas e minusculas
+int comparar_texto(const char *a, const char *b) {
+    int i = 0;
+    while (a[i] != '\0' && b[i] != '\0') {
+        int ca = tolower((unsigned char) a[i]);
+        int cb = tolower((unsigned char) b[i]);
+        if (ca != cb) {
+            return ca - cb;
+        }
+        i++;
+    }
+    return tolower((unsigned char) a[i]) - tolower((unsigned char) b[i]);
+}
+
+// compara dois nos pelo criterio; negativo se "a" deve vir antes de "b"
+int comparar(Servico *a, Servico *b, int criterio) {
+    if (criterio == POR_ID) {
+        return a->id - b->id;
+    }
+    return comparar_texto(a->nome, b->nome);
+}
+
 // troca os dados de dois nos, mantendo cada ponteiro proximo no lugar
 void trocar_dados(Servico *a, Servico *b) {
     Servico temp = *a;
@@ -420,10 +445,10 @@ void trocar_dados(Servico *a, Servico *b) {
     b->proximo = proxB;
 }
 
-/* ordena a lista por nome (a-z) com insertion sort.
+/* ordena a lista com insertion sort pelo criterio (id crescente ou nome a-z).
    o inicio da lista e a parte ja ordenada; a cada passo, o proximo no
    e encaixado na posicao certa deslocando os dados com trocas */
-void ordenar_por_nome(Servico *cabeca) {
+void ordenar_lista(Servico *cabeca, int criterio) {
     if (cabeca == NULL || cabeca->proximo == NULL) {
         return;
     }
@@ -432,12 +457,12 @@ void ordenar_por_nome(Servico *cabeca) {
     while (ultimo->proximo != NULL) {
         Servico *atual = ultimo->proximo; // no a ser encaixado
 
-        if (strcmp(ultimo->nome, atual->nome) <= 0) {
+        if (comparar(ultimo, atual, criterio) <= 0) {
             ultimo = atual; // ja esta na posicao certa
         } else {
             // acha o primeiro no da parte ordenada com nome maior que o atual
             Servico *pos = cabeca;
-            while (strcmp(pos->nome, atual->nome) <= 0) {
+            while (comparar(pos, atual, criterio) <= 0) {
                 pos = pos->proximo;
             }
             // empurra os dados para frente ate chegar no atual
@@ -451,15 +476,43 @@ void ordenar_por_nome(Servico *cabeca) {
     }
 }
 
-// ordena e mostra a lista
+// mostra a lista ordenada por nome e depois volta a lista para a ordem de id
 void ordenar(Servico *cabeca) {
     if (cabeca == NULL) {
         printf("Lista vazia.\n");
         return;
     }
-    ordenar_por_nome(cabeca);
+    ordenar_lista(cabeca, POR_NOME);
     printf("Lista ordenada por nome (A-Z):\n\n");
     listar(cabeca);
+    ordenar_lista(cabeca, POR_ID);
+}
+
+// mostra o total de servicos e a quantidade por categoria
+void analisar(Servico *cabeca) {
+    int contagem[QTD_CATEGORIAS] = {0};
+    int total = 0;
+
+    if (cabeca == NULL) {
+        printf("Lista vazia.\n\n");
+    }
+
+    Servico *atual = cabeca;
+    while (atual != NULL) {
+        total++;
+        for (int i = 0; i < QTD_CATEGORIAS; i++) {
+            if (strcmp(atual->categoria, CATEGORIAS[i]) == 0) {
+                contagem[i]++;
+                break;
+            }
+        }
+        atual = atual->proximo;
+    }
+
+    printf("Total de servicos: %d\n", total);
+    for (int i = 0; i < QTD_CATEGORIAS; i++) {
+        printf("\t%s: %d\n", CATEGORIAS[i], contagem[i]);
+    }
 }
 
 // formata o titulo da opcao escolhida
@@ -499,6 +552,11 @@ int salvar(Servico *cabeca) {
     }
     fclose(arq);
     return 1;
+}
+
+void salvar_por_id(Servico *cabeca) {
+    ordenar_lista(cabeca, POR_ID);
+    salvar(cabeca);
 }
 
 /* le o arquivo e monta a lista encadeada;
@@ -544,10 +602,11 @@ Servico *carregar(void) {
 // MAIN   
 int main(void) {
     Servico *lista = carregar();
+    ordenar_lista(lista, POR_ID); // garante a ordem de id mesmo com arquivo antigo
     int op;
 
     do {
-        printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n5 - Atualizar\n6 - Excluir\n7 - Ordenar por nome\n0 - Sair\n");
+        printf("\n1 - Cadastrar\n2 - Listar\n3 - Consultar por ID\n4 - Pesquisar\n5 - Atualizar\n6 - Excluir\n7 - Ordenar por nome\n8 - Analise\n0 - Sair\n");
         if (!ler_inteiro("Opcao: ", &op)) {
             op = -1;
         }
@@ -555,7 +614,7 @@ int main(void) {
             case 1:
                 titulo("CADASTRO");
                 lista = cadastrar(lista);
-                salvar(lista);
+                salvar_por_id(lista);
                 break;
             case 2:
                 titulo("LISTAR");
@@ -572,20 +631,23 @@ int main(void) {
             case 5:
                 titulo("ATUALIZAR");
                 atualizar(lista);
-                salvar(lista);
+                salvar_por_id(lista);
                 break;
             case 6:
                 titulo("EXCLUIR");
                 lista = excluir(lista);
-                salvar(lista);
+                salvar_por_id(lista);
                 break;
             case 7:
                 titulo("ORDENAR");
                 ordenar(lista);
-                salvar(lista);
+                break;
+            case 8:
+                titulo("ANALISE");
+                analisar(lista);
                 break;
             case 0:
-               printf("\nENCERRAR");
+               printf("\t\tENCERRADO\n");
                 break;
             default: 
                 printf("Opcao invalida.\n");
