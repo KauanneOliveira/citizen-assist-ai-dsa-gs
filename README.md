@@ -1,6 +1,6 @@
 # Citizen Assist AI - Rede de Apoio à Mulher
 
-Global Solution 2026.2 - Data Structures and Algorithms (DSA). Protótipo em C, executado no terminal.
+Global Solution 2026.2 - Protótipo em C, executado no terminal.
 
 ## Identificação Acadêmica
 **Disciplina**: Data Structures and Algorithms <br>
